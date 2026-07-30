@@ -8,6 +8,7 @@ export default {
     { name: "primaryAction", label: { en: "On primary action (Schedule)" }, event: { id: "", workOrder: {} } },
     { name: "secondaryAction", label: { en: "On secondary action (Cancel)" }, event: { id: "", workOrder: {} } },
     { name: "openFull", label: { en: "On open full work order" }, event: { id: "", workOrder: {} } },
+    { name: "tagChange", label: { en: "On tag changed" }, event: { id: "", key: "", previous: "", value: "", label: "" } },
   ],
   properties: {
     // ---- Work order record ----
@@ -60,10 +61,10 @@ export default {
 
     editable: { label: { en: "Allow inline editing" }, type: "OnOff", defaultValue: true, bindable: true },
 
-    // ---- Tags (bindable multi-select dropdown in the body) ----
-    showTags: { label: { en: "Show tags field" }, type: "OnOff", defaultValue: true, bindable: true },
-    tagsLabel: { label: { en: "Label: tags" }, type: "Text", defaultValue: "Tags", bindable: true },
-    tagsField: { label: { en: "Field: tags (on the work order)" }, type: "Text", defaultValue: "tag_name", bindable: true, section: "settings" },
+    // ---- Tag (bindable single-select dropdown in the body) ----
+    showTags: { label: { en: "Show tag field" }, type: "OnOff", defaultValue: true, bindable: true },
+    tagsLabel: { label: { en: "Label: tag" }, type: "Text", defaultValue: "Tag", bindable: true },
+    tagsField: { label: { en: "Field: tag (on the work order)" }, type: "Text", defaultValue: "tag_name", bindable: true, section: "settings" },
     // Bind your tags collection here (records like { label, airtable_id, sort_order, is_active }).
     // Accepts a plain array OR a WeWeb collection { data: [...] }.
     tagOptions: {
@@ -82,8 +83,8 @@ export default {
     },
     tagOptionLabel: { label: { en: "Tag option label field" }, type: "Text", defaultValue: "label", bindable: true, section: "settings" },
     tagOptionValue: { label: { en: "Tag option value field" }, type: "Text", defaultValue: "airtable_id", bindable: true, section: "settings" },
-    tagsPlaceholder: { label: { en: "Tags: add button text" }, type: "Text", defaultValue: "Add tags", bindable: true },
-    tagsSearchPlaceholder: { label: { en: "Tags: search placeholder" }, type: "Text", defaultValue: "Search tags", bindable: true },
+    tagsPlaceholder: { label: { en: "Tag: empty text" }, type: "Text", defaultValue: "Select a tag", bindable: true },
+    tagsSearchPlaceholder: { label: { en: "Tag: search placeholder" }, type: "Text", defaultValue: "Search tags", bindable: true },
 
     // ---- Vendor Information ----
     showVendor: { label: { en: "Show vendor card" }, type: "OnOff", defaultValue: true, bindable: true },

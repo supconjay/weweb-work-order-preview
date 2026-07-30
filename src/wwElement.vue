@@ -134,33 +134,36 @@
           </div>
         </div>
 
-        <!-- Tags (bindable dropdown) -->
+        <!-- Tag (single-select dropdown) -->
         <div v-if="content.showTags !== false" class="pp-field pp-field--full">
-          <span class="pp-field__label">{{ content.tagsLabel || 'Tags' }}</span>
+          <span class="pp-field__label">{{ content.tagsLabel || 'Tag' }}</span>
           <div class="pp-tags">
-            <div class="pp-tags__chips">
-              <span v-for="v in selectedTagValues" :key="v" class="pp-tag">
-                <svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('tag')"></path></svg>
-                {{ tagChipLabel(v) }}
-                <button v-if="canEdit" type="button" class="pp-tag__x" :aria-label="'Remove ' + tagChipLabel(v)" @click="removeTag(v)"><svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('x')"></path></svg></button>
-              </span>
-              <span v-if="!selectedTagValues.length && !canEdit" class="pp-muted">—</span>
-              <button v-if="canEdit" type="button" class="pp-tags__add" :class="{ 'pp-tags__add--open': tagsOpen }" @click="toggleTagsOpen">
-                <svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('plus')"></path></svg>
-                <span>{{ content.tagsPlaceholder || 'Add tags' }}</span>
+            <template v-if="canEdit">
+              <button type="button" class="pp-tagselect" :class="{ 'pp-tagselect--open': tagsOpen }" @click="toggleTagsOpen">
+                <span v-if="selectedTagValue" class="pp-tag">
+                  <svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('tag')"></path></svg>{{ tagChipLabel(selectedTagValue) }}
+                </span>
+                <span v-else class="pp-tagselect__ph">{{ content.tagsPlaceholder || 'Select a tag' }}</span>
                 <svg class="pp-svg pp-tags__chev" v-bind="svgAttrs"><path :d="ic('chevron-down')"></path></svg>
               </button>
-            </div>
-            <div v-if="canEdit && tagsOpen" class="pp-tags__panel">
-              <input v-model="tagQuery" class="pp-input" type="text" :placeholder="content.tagsSearchPlaceholder || 'Search tags'" />
-              <ul class="pp-tags__list">
-                <li v-if="!filteredTagOptions.length" class="pp-tags__empty">No tags</li>
-                <li v-for="opt in filteredTagOptions" :key="opt.value" class="pp-tags__opt" @click="toggleTag(opt)">
-                  <span class="pp-check" :class="{ 'pp-check--on': isTagSelected(opt) }"><svg v-if="isTagSelected(opt)" class="pp-svg" v-bind="svgAttrs"><path :d="ic('check')"></path></svg></span>
-                  <span>{{ opt.label }}</span>
-                </li>
-              </ul>
-            </div>
+              <div v-if="tagsOpen" class="pp-tags__panel">
+                <input v-model="tagQuery" class="pp-input" type="text" :placeholder="content.tagsSearchPlaceholder || 'Search tags'" />
+                <ul class="pp-tags__list">
+                  <li v-if="selectedTagValue" class="pp-tags__opt pp-tags__opt--clear" @click="clearTag">
+                    <svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('x')"></path></svg><span>Clear tag</span>
+                  </li>
+                  <li v-if="!filteredTagOptions.length" class="pp-tags__empty">No tags</li>
+                  <li v-for="opt in filteredTagOptions" :key="opt.value" class="pp-tags__opt" :class="{ 'pp-tags__opt--sel': isTagSelected(opt) }" @click="chooseTag(opt)">
+                    <span class="pp-radio" :class="{ 'pp-radio--on': isTagSelected(opt) }"></span>
+                    <span>{{ opt.label }}</span>
+                  </li>
+                </ul>
+              </div>
+            </template>
+            <template v-else>
+              <span v-if="selectedTagValue" class="pp-tag"><svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('tag')"></path></svg>{{ tagChipLabel(selectedTagValue) }}</span>
+              <span v-else class="pp-muted">—</span>
+            </template>
           </div>
         </div>
       </div>
@@ -444,20 +447,19 @@ export default {
       return out;
     },
     tagsFieldKey() { return this.content.tagsField || "tag_name"; },
-    rawTags() {
+    rawTag() {
       const v = this.workOrder[this.tagsFieldKey];
-      if (Array.isArray(v)) return v.slice();
-      return v == null || v === "" ? [] : [v];
+      const first = Array.isArray(v) ? (v.length ? v[0] : "") : v;
+      return first == null ? "" : first;
     },
-    selectedTagValues() {
+    // A single selected tag value. Matches the WO field entry to an option by
+    // value OR label (works whether the field stores an id or a name).
+    selectedTagValue() {
       if (Object.prototype.hasOwnProperty.call(this.localEdits, this.tagsFieldKey)) return this.localEdits[this.tagsFieldKey];
-      // Match each raw entry to an option by value OR label (handles fields that
-      // store ids as well as fields that store names), else keep the raw value.
-      return this.rawTags.map((r) => {
-        const s = String(r);
-        const opt = this.tagOptions.find((o) => String(o.value) === s || String(o.label) === s);
-        return opt ? opt.value : s;
-      });
+      const s = String(this.rawTag);
+      if (s === "") return "";
+      const opt = this.tagOptions.find((o) => String(o.value) === s || String(o.label) === s);
+      return opt ? opt.value : s;
     },
     filteredTagOptions() {
       const q = String(this.tagQuery || "").trim().toLowerCase();
@@ -595,28 +597,28 @@ export default {
       this.localEdits = Object.assign({}, this.localEdits, { [field]: value });
       this.$emit("trigger-event", { name: "fieldChange", event: { field: label, key: field, previous: prev, value } });
     },
-    // ---- tags ----
+    // ---- tag (single-select, own trigger) ----
     toggleTagsOpen() { this.tagsOpen = !this.tagsOpen; if (this.tagsOpen) this.tagQuery = ""; },
-    isTagSelected(opt) { return this.selectedTagValues.some((v) => String(v) === String(opt.value)); },
+    isTagSelected(opt) { return String(this.selectedTagValue) === String(opt.value); },
     tagChipLabel(v) { const o = this.tagOptions.find((x) => String(x.value) === String(v)); return o ? o.label : String(v); },
-    toggleTag(opt) {
-      const prev = this.selectedTagValues.slice();
-      const next = prev.slice();
-      const i = next.findIndex((v) => String(v) === String(opt.value));
-      if (i >= 0) next.splice(i, 1); else next.push(opt.value);
-      this.emitTags(prev, next);
+    chooseTag(opt) {
+      const prev = this.selectedTagValue;
+      // Clicking the current tag again clears it; otherwise it replaces.
+      const next = String(prev) === String(opt.value) ? "" : opt.value;
+      this.tagsOpen = false;
+      this.emitTag(prev, next);
     },
-    removeTag(v) {
-      const prev = this.selectedTagValues.slice();
-      const next = prev.filter((x) => String(x) !== String(v));
-      this.emitTags(prev, next);
+    clearTag() {
+      const prev = this.selectedTagValue;
+      this.tagsOpen = false;
+      this.emitTag(prev, "");
     },
-    emitTags(prev, next) {
+    emitTag(prev, next) {
       const field = this.tagsFieldKey;
       this.localEdits = Object.assign({}, this.localEdits, { [field]: next });
       this.$emit("trigger-event", {
-        name: "fieldChange",
-        event: { field: this.content.tagsLabel || "Tags", key: field, previous: prev, value: next, labels: next.map((v) => this.tagChipLabel(v)) },
+        name: "tagChange",
+        event: { id: this.workOrder[this.content.idField || "id"] || "", key: field, previous: prev || "", value: next || "", label: next ? this.tagChipLabel(next) : "" },
       });
     },
     toggleEmergency() {
@@ -947,26 +949,27 @@ export default {
 .pp-emptybox { display: flex; align-items: center; gap: 10px; padding: 18px 16px; border: 1px dashed var(--border-strong); border-radius: 12px; background: var(--surface-2); color: var(--text-subtle); font-size: 13.5px; }
 .pp-emptybox .pp-svg { width: 20px; height: 20px; flex: none; }
 
-/* Tags dropdown */
-.pp-tags { display: flex; flex-direction: column; gap: 8px; }
-.pp-tags__chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.pp-tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px 4px 9px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); font-size: 12.5px; font-weight: 600; }
+/* Tag single-select */
+.pp-tags { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.pp-tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); font-size: 12.5px; font-weight: 600; }
 .pp-tag .pp-svg { width: 12px; height: 12px; }
-.pp-tag__x { display: grid; place-items: center; border: none; background: transparent; color: inherit; cursor: pointer; padding: 0; opacity: .7; }
-.pp-tag__x:hover { opacity: 1; }
-.pp-tags__add { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border: 1px dashed var(--border-strong); border-radius: 999px; background: transparent; color: var(--text-muted); font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: border-color .15s, color .15s; }
-.pp-tags__add:hover, .pp-tags__add--open { border-color: var(--primary); color: var(--primary); }
-.pp-tags__add .pp-svg { width: 13px; height: 13px; }
-.pp-tags__chev { transition: transform .18s; }
-.pp-tags__add--open .pp-tags__chev { transform: rotate(180deg); }
-.pp-tags__panel { border: 1px solid var(--border-strong); border-radius: 12px; padding: 8px; background: var(--surface); box-shadow: var(--shadow-sm); }
-.pp-tags__list { list-style: none; margin: 6px 0 0; padding: 0; max-height: 220px; overflow-y: auto; }
+.pp-tagselect { display: inline-flex; align-items: center; gap: 8px; min-width: 200px; max-width: 100%; justify-content: space-between; padding: 7px 11px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 13.5px; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.pp-tagselect:hover { border-color: var(--primary); }
+.pp-tagselect--open { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent); }
+.pp-tagselect__ph { color: var(--text-subtle); }
+.pp-tags__chev { width: 15px; height: 15px; color: var(--text-muted); flex: none; transition: transform .18s; }
+.pp-tagselect--open .pp-tags__chev { transform: rotate(180deg); }
+.pp-tags__panel { align-self: stretch; border: 1px solid var(--border-strong); border-radius: 12px; padding: 8px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.pp-tags__list { list-style: none; margin: 6px 0 0; padding: 0; max-height: 240px; overflow-y: auto; }
 .pp-tags__opt { display: flex; align-items: center; gap: 9px; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 13.5px; color: var(--text); transition: background .12s; }
 .pp-tags__opt:hover { background: var(--surface-3); }
+.pp-tags__opt--sel { color: var(--primary); font-weight: 600; }
+.pp-tags__opt--clear { color: var(--text-muted); }
+.pp-tags__opt--clear .pp-svg { width: 14px; height: 14px; }
 .pp-tags__empty { padding: 12px 8px; color: var(--text-subtle); font-size: 13px; text-align: center; }
-.pp-check { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border-strong); color: #fff; }
-.pp-check--on { background: var(--primary); border-color: var(--primary); }
-.pp-check .pp-svg { width: 12px; height: 12px; stroke-width: 3; }
+.pp-radio { flex: none; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border-strong); position: relative; }
+.pp-radio--on { border-color: var(--primary); }
+.pp-radio--on::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--primary); }
 
 /* Pills */
 .pp-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
