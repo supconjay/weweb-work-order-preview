@@ -1,0 +1,11 @@
+{
+  "name": "pp-work-order",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "weweb build --name=pp-work-order --type=wwobject",
+    "serve": "weweb serve --type=wwobject"
+  },
+  "devDependencies": {
+    "@weweb/cli": "latest"
+  }
+}
