@@ -57,6 +57,31 @@ export default {
 
     editable: { label: { en: "Allow inline editing" }, type: "OnOff", defaultValue: true, bindable: true },
 
+    // ---- Tags (bindable multi-select dropdown in the body) ----
+    showTags: { label: { en: "Show tags field" }, type: "OnOff", defaultValue: true, bindable: true },
+    tagsLabel: { label: { en: "Label: tags" }, type: "Text", defaultValue: "Tags", bindable: true },
+    tagsField: { label: { en: "Field: tags (on the work order)" }, type: "Text", defaultValue: "tag_name", bindable: true, section: "settings" },
+    // Bind your tags collection here (records like { label, airtable_id, sort_order, is_active }).
+    // Accepts a plain array OR a WeWeb collection { data: [...] }.
+    tagOptions: {
+      label: { en: "Tag options (bind list)" }, type: "Array", bindable: true,
+      defaultValue: [
+        { label: "Ready To Invoice", airtable_id: "reclGYIMNtoNqz50", sort_order: 1, is_active: true },
+        { label: "Need Notes/Photos", airtable_id: "recA2Ac9foq2x5X", sort_order: 2, is_active: true },
+        { label: "Quote", airtable_id: "recixr3ZSnb1mAFe", sort_order: 3, is_active: true },
+        { label: "Waiting on Materials", airtable_id: "rechqxvMGlfdxMV", sort_order: 4, is_active: true },
+        { label: "On Hold", airtable_id: "rec36C3DeqYewy5", sort_order: 8, is_active: true },
+        { label: "QC Needed", airtable_id: "recp6lXHlmapL8Yt", sort_order: 9, is_active: true },
+        { label: "Priority Client", airtable_id: "recTFvnIt8I6OMT5", sort_order: 10, is_active: true },
+        { label: "Warranty", airtable_id: "recqqFbX1MX9OO", sort_order: 12, is_active: true },
+        { label: "Below Margin", airtable_id: "recZEN9xBpXn6N", sort_order: 14, is_active: true },
+      ],
+    },
+    tagOptionLabel: { label: { en: "Tag option label field" }, type: "Text", defaultValue: "label", bindable: true, section: "settings" },
+    tagOptionValue: { label: { en: "Tag option value field" }, type: "Text", defaultValue: "airtable_id", bindable: true, section: "settings" },
+    tagsPlaceholder: { label: { en: "Tags: add button text" }, type: "Text", defaultValue: "Add tags", bindable: true },
+    tagsSearchPlaceholder: { label: { en: "Tags: search placeholder" }, type: "Text", defaultValue: "Search tags", bindable: true },
+
     // ---- Vendor Information ----
     showVendor: { label: { en: "Show vendor card" }, type: "OnOff", defaultValue: true, bindable: true },
     vendorTitle: { label: { en: "Vendor card title" }, type: "Text", defaultValue: "Vendor Information", bindable: true },
@@ -79,6 +104,7 @@ export default {
     tenantNameField: { label: { en: "Field: tenant name" }, type: "Text", defaultValue: "name", bindable: true, section: "settings" },
     tenantEmailField: { label: { en: "Field: tenant email" }, type: "Text", defaultValue: "email", bindable: true, section: "settings" },
     tenantPhoneField: { label: { en: "Field: tenant phone" }, type: "Text", defaultValue: "phone", bindable: true, section: "settings" },
+    tenantEmptyText: { label: { en: "Tenant empty text" }, type: "Text", defaultValue: "No tenant records for this work order", bindable: true },
     tenantName: { label: { en: "Tenant name (override)" }, type: "Text", defaultValue: "", bindable: true },
     tenantEmail: { label: { en: "Tenant email (override)" }, type: "Text", defaultValue: "", bindable: true },
     tenantPhone: { label: { en: "Tenant phone (override)" }, type: "Text", defaultValue: "", bindable: true },
