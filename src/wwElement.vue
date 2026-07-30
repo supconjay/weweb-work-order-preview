@@ -24,6 +24,7 @@
           <svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('phone')"></path></svg><span>{{ vendorPhone }}</span>
         </a>
         <span v-else class="pp-contact__row pp-contact__row--muted"><svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('phone')"></path></svg><span>{{ content.phoneEmptyText || 'Phone not available' }}</span></span>
+        <span v-if="vendorRole" class="pp-contact__row"><svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('briefcase')"></path></svg><span>{{ vendorRole }}</span></span>
       </div>
     </section>
 
@@ -296,6 +297,7 @@ const ICONS = {
   user: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
   mail: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6",
   phone: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z",
+  briefcase: "M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zM2 12h20",
   pencil: "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
   check: "M20 6L9 17l-5-5",
   x: "M18 6L6 18M6 6l12 12",
@@ -354,6 +356,7 @@ export default {
     },
     vendorEmail() { return this.str(this.content.vendorEmail); },
     vendorPhone() { return this.str(this.content.vendorPhone); },
+    vendorRole() { return this.str(this.content.vendorRole); },
     tenantObj() {
       let src = this.content.tenant;
       if (Array.isArray(src)) return src[0] || {};
@@ -435,6 +438,7 @@ export default {
         "--pp-primary": this.content.primaryColor || "#10b981",
         "--pp-accent": this.content.accentColor || "#6366f1",
         "--pp-radius": (this.content.radius != null ? this.content.radius : 16) + "px",
+        "--pp-gap": (this.content.sectionGap != null && this.content.sectionGap !== "" ? this.content.sectionGap : 18) + "px",
       };
     },
   },
@@ -735,8 +739,11 @@ export default {
   container-type: inline-size;
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.45;
-  display: flex; flex-direction: column; gap: 24px;
+  display: flex; flex-direction: column;
 }
+/* WeWeb forces the root to display:block (which kills flex gap), so space sections with margins */
+.pp-root > .pp-header, .pp-root > .pp-card { margin-bottom: var(--pp-gap, 18px); }
+.pp-root > .pp-actions { margin-bottom: 0; }
 .pp-root *, .pp-root *::before, .pp-root *::after { box-sizing: border-box; }
 @mixin dark {
   --surface: #161f30; --surface-2: #1b2638; --surface-3: #202c40; --border: #28344a; --border-strong: #34425c;

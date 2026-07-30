@@ -64,6 +64,7 @@ export default {
     vendorName: { label: { en: "Vendor name (override, bindable)" }, type: "Text", defaultValue: "", bindable: true },
     vendorEmail: { label: { en: "Vendor email (bindable)" }, type: "Text", defaultValue: "accounts@checkelectric.com", bindable: true },
     vendorPhone: { label: { en: "Vendor phone (bindable)" }, type: "Text", defaultValue: "(470) 744-1030", bindable: true },
+    vendorRole: { label: { en: "Vendor role (bindable)" }, type: "Text", defaultValue: "3rd Party Technician", bindable: true },
 
     // ---- Tenant Information (bindable) ----
     showTenant: { label: { en: "Show tenant card" }, type: "OnOff", defaultValue: true, bindable: true },
@@ -134,5 +135,6 @@ export default {
       ] }, defaultValue: "auto", bindable: true,
     },
     radius: { label: { en: "Corner radius (px)" }, type: "Number", options: { min: 0, max: 32, step: 1 }, defaultValue: 16, bindable: true },
+    sectionGap: { label: { en: "Gap between sections (px)" }, type: "Number", options: { min: 0, max: 48, step: 1 }, defaultValue: 18, bindable: true },
   },
 };
