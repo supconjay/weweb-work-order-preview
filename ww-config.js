@@ -7,6 +7,7 @@ export default {
     { name: "attachmentClick", label: { en: "On activity attachment click" }, event: { url: "", type: "", filename: "", isImage: false, attachment: {} } },
     { name: "primaryAction", label: { en: "On primary action (Schedule)" }, event: { id: "", workOrder: {} } },
     { name: "secondaryAction", label: { en: "On secondary action (Cancel)" }, event: { id: "", workOrder: {} } },
+    { name: "openFull", label: { en: "On open full work order" }, event: { id: "", workOrder: {} } },
   ],
   properties: {
     // ---- Work order record ----
@@ -30,10 +31,12 @@ export default {
     },
     idField: { label: { en: "Field: id" }, type: "Text", defaultValue: "id", bindable: true, section: "settings" },
 
-    // ---- Header (optional; the modal already shows the title) ----
-    showHeader: { label: { en: "Show header (title + status)" }, type: "OnOff", defaultValue: false, bindable: true },
+    // ---- Sticky header (title + status + Open) ----
+    showHeader: { label: { en: "Show sticky header" }, type: "OnOff", defaultValue: true, bindable: true },
     title: { label: { en: "Fallback title" }, type: "Text", defaultValue: "Work Order", bindable: true },
     displayField: { label: { en: "Field: title / display" }, type: "Text", defaultValue: "display", bindable: true, section: "settings" },
+    showOpen: { label: { en: "Show 'Open' button in header" }, type: "OnOff", defaultValue: true, bindable: true },
+    openLabel: { label: { en: "Open button label" }, type: "Text", defaultValue: "Open", bindable: true },
 
     // ---- Work order field mapping ----
     woField: { label: { en: "Field: WO# (editable)" }, type: "Text", defaultValue: "external_id_from_project", bindable: true, section: "settings" },

@@ -1,11 +1,15 @@
 <template>
   <div class="pp-root" :class="themeClass" :style="rootStyle">
-    <!-- Optional header -->
-    <div v-if="content.showHeader === true" class="pp-header">
+    <!-- Sticky header -->
+    <div v-if="content.showHeader !== false" class="pp-header">
       <div class="pp-header__left">
         <h2 class="pp-header__title">{{ dv(content.displayField, ['display']) || content.title || 'Work Order' }}</h2>
         <span v-if="statusText" class="pp-pill" :class="'pp-pill--' + statusKey(statusText)"><span class="pp-pill__dot"></span>{{ statusText }}</span>
       </div>
+      <button v-if="content.showOpen !== false" type="button" class="pp-btn pp-btn--ghost pp-open" @click="emitOpenFull">
+        <svg class="pp-svg" v-bind="svgAttrs"><path :d="ic('external-link')"></path></svg>
+        <span>{{ content.openLabel || 'Open' }}</span>
+      </button>
     </div>
 
     <!-- Vendor Information -->
@@ -334,6 +338,7 @@ const ICONS = {
   briefcase: "M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zM2 12h20",
   "chevron-down": "M6 9l6 6 6-6",
   tag: "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01",
+  "external-link": "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3",
   pencil: "M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z",
   check: "M20 6L9 17l-5-5",
   x: "M18 6L6 18M6 6l12 12",
@@ -827,6 +832,9 @@ export default {
     emitAtt(att) {
       this.$emit("trigger-event", { name: "attachmentClick", event: { url: (att && att.url) || "", type: this.attType(att), filename: this.attName(att), isImage: this.isImage(att), attachment: att || null } });
     },
+    emitOpenFull() {
+      this.$emit("trigger-event", { name: "openFull", event: { id: this.workOrder[this.content.idField || "id"] || "", workOrder: this.workOrder } });
+    },
     emitAction(which) {
       this.$emit("trigger-event", { name: which === "primary" ? "primaryAction" : "secondaryAction", event: { id: this.workOrder[this.content.idField || "id"] || "", workOrder: this.workOrder } });
     },
@@ -869,9 +877,14 @@ export default {
 .pp-card__ico { width: 17px; height: 17px; color: var(--text-muted); }
 .pp-card__bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
 
-.pp-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.pp-header__left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.pp-header__title { margin: 0; font-size: 20px; font-weight: 800; color: var(--text); }
+.pp-header {
+  position: sticky; top: 0; z-index: 6;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--surface); padding: 12px 2px; border-bottom: 1px solid var(--border);
+}
+.pp-header__left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.pp-header__title { margin: 0; font-size: 18px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; }
+.pp-open { flex: none; }
 
 /* Contact card (vendor / tenant) */
 .pp-contact { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--surface-2); display: flex; flex-direction: column; gap: 11px; }
@@ -1059,7 +1072,12 @@ export default {
 .pp-pager__info { font-size: 13px; font-weight: 600; color: var(--text-muted); min-width: 96px; text-align: center; }
 
 /* Footer actions */
-.pp-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.pp-actions {
+  position: sticky; bottom: 0; z-index: 6;
+  display: flex; justify-content: flex-end; gap: 10px;
+  background: var(--surface); padding: 12px 2px; border-top: 1px solid var(--border);
+  margin-bottom: 0;
+}
 .pp-btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: filter .15s, background .15s, border-color .15s; }
 .pp-btn .pp-svg { width: 15px; height: 15px; }
 .pp-btn--primary { background: var(--primary); color: #fff; }
